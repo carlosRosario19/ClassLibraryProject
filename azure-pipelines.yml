@@ -6,7 +6,9 @@ variables:
   nugetFeed: 'StringLibrary-Feed'  
 
 pool:
-  vmImage: 'windows-latest'  
+  vmImage: 'windows-latest'
+  demands:          # Critical change to avoid parallelism checks
+    - Agent.OS -equals Windows_NT
 
 steps:
 - task: UseDotNet@2

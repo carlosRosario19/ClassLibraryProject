@@ -1,0 +1,29 @@
+trigger:
+  - main  
+
+variables:
+  buildConfiguration: 'Release'
+  nugetFeed: 'StringLibrary-Feed'  
+
+pool:
+  vmImage: 'windows-latest'  
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '8.0.x'  
+
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Build the project'
+
+- script: dotnet pack --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+  displayName: 'Create NuGet package'
+
+- task: NuGetAuthenticate@1  
+  displayName: 'Authenticate with Azure Artifacts'
+
+- script: |
+    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg \
+      --source $(nugetFeed) \
+      --api-key az 
+  displayName: 'Push to Azure Artifacts'

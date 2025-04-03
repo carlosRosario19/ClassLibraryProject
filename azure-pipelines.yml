@@ -2,7 +2,7 @@ trigger:
   - main
 
 pool:
-  vmImage: 'windows-latest'  # Free Microsoft-hosted agent (replace later with self-hosted)
+  name: 'Self-Hosted-Agent'   # Free Microsoft-hosted agent (replace later with self-hosted)
 
 variables:
   buildConfiguration: 'Release'

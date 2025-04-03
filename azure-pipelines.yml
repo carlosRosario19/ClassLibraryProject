@@ -1,29 +1,30 @@
 trigger:
-  - main
-
-variables:
-  buildConfiguration: 'Release'
-  nugetFeed: 'StringLibrary-Feed'
+- main  # Adjust based on your branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Self-Hosted-Agent'  # Ensure this matches your agent's name
+
+variables:
+  BuildConfiguration: 'Release'
+  PackageVersion: '1.0.0'  # Update versioning as needed
+  NuGetFeedUrl: 'https://pkgs.dev.azure.com/YOUR_ORG/YOUR_PROJECT/_packaging/YOUR_FEED/nuget/v3/index.json'
+  PAT: $(lab4PAT)
 
 steps:
 - task: UseDotNet@2
+  displayName: 'Install .NET 8'
   inputs:
+    packageType: 'sdk'
     version: '8.0.x'
 
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'Build the project'
+- script: dotnet build --configuration $(BuildConfiguration)
+  displayName: 'Build Solution'
 
-- script: dotnet pack --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
-  displayName: 'Create NuGet package'
+- script: dotnet pack --configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(PackageVersion)
+  displayName: 'Pack NuGet Package'
 
 - task: NuGetAuthenticate@1
   displayName: 'Authenticate with Azure Artifacts'
 
-- script: |
-    dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg \
-      --source $(nugetFeed) \
-      --api-key az
+- script: dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --api-key $(PAT) --source $(NuGetFeedUrl) --skip-duplicate
   displayName: 'Push to Azure Artifacts'

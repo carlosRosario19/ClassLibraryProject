@@ -6,7 +6,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  nugetFeedName: 'ClassLibraryProject-Feed'
+  nugetFeedName: 'ClassLibraryProjectFeed'
   packageOutputDir: '$(Build.ArtifactStagingDirectory)/nupkg'  # Explicit output directory
 
 steps:

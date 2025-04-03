@@ -1,30 +1,47 @@
 trigger:
-- main  # Adjust based on your branch
+  - main
 
 pool:
-  name: 'Self-Hosted-Agent'  # Ensure this matches your agent's name
+  vmImage: 'windows-latest'  # Free Microsoft-hosted agent (replace later with self-hosted)
 
 variables:
-  BuildConfiguration: 'Release'
-  PackageVersion: '1.0.0'  # Update versioning as needed
-  NuGetFeedUrl: 'https://pkgs.dev.azure.com/YOUR_ORG/YOUR_PROJECT/_packaging/YOUR_FEED/nuget/v3/index.json'
-  PAT: $(lab4PAT)
+  buildConfiguration: 'Release'
+  nugetFeedName: 'MyNuGetFeed'  # Match your feed name
 
 steps:
-- task: UseDotNet@2
-  displayName: 'Install .NET 8'
+- task: NuGetToolInstaller@1
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet packages'
   inputs:
-    packageType: 'sdk'
-    version: '8.0.x'
+    command: 'restore'
+    projects: '**/*.csproj'
 
-- script: dotnet build --configuration $(BuildConfiguration)
-  displayName: 'Build Solution'
+- task: DotNetCoreCLI@2
+  displayName: 'Build'
+  inputs:
+    command: 'build'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
+    projects: '**/*.csproj'
 
-- script: dotnet pack --configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(PackageVersion)
-  displayName: 'Pack NuGet Package'
+- task: DotNetCoreCLI@2
+  displayName: 'Pack NuGet'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'ByPrereleaseNumber'
+    majorVersion: '1'
+    minorVersion: '0'
+    patchVersion: '0'
+    configuration: $(buildConfiguration)
 
-- task: NuGetAuthenticate@1
-  displayName: 'Authenticate with Azure Artifacts'
+- task: NuGetAuthenticate@1  # Authenticate with Azure Artifacts
 
-- script: dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" --api-key $(PAT) --source $(NuGetFeedUrl) --skip-duplicate
+- task: NuGetCommand@2
   displayName: 'Push to Azure Artifacts'
+  inputs:
+    command: 'push'
+    feedsToUse: 'select'
+    packagesToPush: '**/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '$(nugetFeedName)'

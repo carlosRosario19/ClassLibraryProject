@@ -2,11 +2,12 @@ trigger:
   - main
 
 pool:
-  name: 'Self-Hosted-Agent'   # Free Microsoft-hosted agent (replace later with self-hosted)
+  name: 'Self-Hosted-Agent'
 
 variables:
   buildConfiguration: 'Release'
-  nugetFeedName: 'ClassLibraryProject-Feed'  # Match your feed name
+  nugetFeedName: 'ClassLibraryProject-Feed'
+  packageOutputDir: '$(Build.ArtifactStagingDirectory)/nupkg'  # Explicit output directory
 
 steps:
 - task: NuGetToolInstaller@1
@@ -28,20 +29,24 @@ steps:
   displayName: 'Pack NuGet'
   inputs:
     command: 'pack'
-    packagesToPack: '**/*.csproj'
+    packagesToPack: '**/StringLibrary.csproj'  # Explicit path to your library project
     versioningScheme: 'ByPrereleaseNumber'
     majorVersion: '1'
     minorVersion: '0'
     patchVersion: '0'
     configuration: $(buildConfiguration)
+    outputDir: $(packageOutputDir)  # Packages go here
 
-- task: NuGetAuthenticate@1  # Authenticate with Azure Artifacts
+- script: ls $(packageOutputDir)  # Debug: Verify .nupkg exists
+  displayName: 'Verify NuGet Package'
+
+- task: NuGetAuthenticate@1
 
 - task: NuGetCommand@2
   displayName: 'Push to Azure Artifacts'
   inputs:
     command: 'push'
     feedsToUse: 'select'
-    packagesToPush: '**/*.nupkg'
+    packagesToPush: '$(packageOutputDir)/*.nupkg'  # Explicit path to package
     nuGetFeedType: 'internal'
     publishVstsFeed: '$(nugetFeedName)'

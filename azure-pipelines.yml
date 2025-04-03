@@ -1,19 +1,18 @@
 trigger:
-  - main  
+  - main
 
 variables:
   buildConfiguration: 'Release'
-  nugetFeed: 'StringLibrary-Feed'  
+  nugetFeed: 'StringLibrary-Feed'
 
 pool:
-  vmImage: 'windows-latest'
-  demands:          # Critical change to avoid parallelism checks
-    - Agent.OS -equals Windows_NT
+  vmImage: 'windows-2019'
+  name: Azure Pipelines
 
 steps:
 - task: UseDotNet@2
   inputs:
-    version: '8.0.x'  
+    version: '8.0.x'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'Build the project'
@@ -21,11 +20,11 @@ steps:
 - script: dotnet pack --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
   displayName: 'Create NuGet package'
 
-- task: NuGetAuthenticate@1  
+- task: NuGetAuthenticate@1
   displayName: 'Authenticate with Azure Artifacts'
 
 - script: |
     dotnet nuget push $(Build.ArtifactStagingDirectory)/*.nupkg \
       --source $(nugetFeed) \
-      --api-key az 
+      --api-key az
   displayName: 'Push to Azure Artifacts'

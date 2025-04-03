@@ -6,7 +6,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  nugetFeedName: 'MyNuGetFeed'  # Match your feed name
+  nugetFeedName: 'ClassLibraryProject-Feed'  # Match your feed name
 
 steps:
 - task: NuGetToolInstaller@1

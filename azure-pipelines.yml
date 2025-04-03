@@ -6,8 +6,7 @@ variables:
   nugetFeed: 'StringLibrary-Feed'
 
 pool:
-  vmImage: 'windows-2019'
-  name: Azure Pipelines
+  vmImage: 'ubuntu-latest'
 
 steps:
 - task: UseDotNet@2

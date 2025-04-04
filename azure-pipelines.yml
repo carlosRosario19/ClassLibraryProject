@@ -7,7 +7,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
   nugetFeedName: 'ClassLibraryProjectFeed'
-  packageOutputDir: '$(Build.ArtifactStagingDirectory)/nupkg'  # Explicit output directory
+  packageOutputDir: '$(Build.ArtifactStagingDirectory)/nupkg'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -29,13 +29,16 @@ steps:
   displayName: 'Pack NuGet'
   inputs:
     command: 'pack'
-    packagesToPack: '**/StringLibrary.csproj'  # Explicit path to your library project
+    packagesToPack: '**/StringLibrary.csproj'
     versioningScheme: 'ByPrereleaseNumber'
     majorVersion: '1'
     minorVersion: '0'
     patchVersion: '0'
     configuration: $(buildConfiguration)
-    outputDir: $(packageOutputDir)  # Packages go here
+    outputDir: $(packageOutputDir)
+
+- script: ls $(packageOutputDir)  # Debug step to verify .nupkg exists
+  displayName: 'Verify NuGet Package'
 
 - task: NuGetAuthenticate@1
 
@@ -44,6 +47,7 @@ steps:
   inputs:
     command: 'push'
     feedsToUse: 'select'
-    packagesToPush: '$(packageOutputDir)/*.nupkg'  # Explicit path to package
+    packagesToPush: '$(packageOutputDir)/*.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: '$(nugetFeedName)'
+    publishVstsFeed: 'https://pkgs.dev.azure.com/crosari5/ClassLibraryProject/_packaging/ClassLibraryProjectFeed/nuget/v3/index.json'
+    verbosity: 'Detailed'  # Added for better error logging

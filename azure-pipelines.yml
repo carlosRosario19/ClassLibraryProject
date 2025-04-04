@@ -37,9 +37,6 @@ steps:
     configuration: $(buildConfiguration)
     outputDir: $(packageOutputDir)
 
-- script: ls $(packageOutputDir)  # Debug step to verify .nupkg exists
-  displayName: 'Verify NuGet Package'
-
 - task: NuGetAuthenticate@1
 
 - task: NuGetCommand@2

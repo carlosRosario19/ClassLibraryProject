@@ -46,5 +46,5 @@ steps:
     feedsToUse: 'select'
     packagesToPush: '$(packageOutputDir)/*.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: 'https://pkgs.dev.azure.com/crosari5/ClassLibraryProject/_packaging/ClassLibraryProjectFeed/nuget/v3/index.json'
+    publishVstsFeed: 'ClassLibraryProject/ClassLibraryProjectFeed'
     verbosity: 'Detailed'  # Added for better error logging
